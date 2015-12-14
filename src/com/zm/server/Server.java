@@ -37,6 +37,9 @@ public class Server implements Runnable {
     JFrame frame;
 
     JPanel ctrlPanel;
+    JLabel titleLabel;
+    JTextField titleField;
+    JButton titleButton;
     JLabel portLabel;
     JTextField portField;
     JButton startButton;
@@ -74,6 +77,15 @@ public class Server implements Runnable {
         frame.setLocation(screenWidth / 20, screenHeight / 20);
 
         ctrlPanel = new JPanel();
+        titleLabel = new JLabel("title");
+        titleField = new JTextField("Fake Server");
+        titleButton = new JButton("Set title");
+        titleButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.setTitle(titleField.getText());
+            }
+        });
         portLabel = new JLabel("port");
         portField = new JTextField("8080");
         startButton  = new JButton("start");
@@ -95,6 +107,9 @@ public class Server implements Runnable {
         UDPButton = new JRadioButton("UDP", false);
         group.add(UDPButton);
 
+        ctrlPanel.add(titleLabel);
+        ctrlPanel.add(titleField);
+        ctrlPanel.add(titleButton);
         ctrlPanel.add(portLabel);
         ctrlPanel.add(portField);
         ctrlPanel.add(TCPButton);
@@ -180,9 +195,10 @@ public class Server implements Runnable {
                     datagramSocket.receive(packet);
                     recLen = packet.getLength();
                 }
-                Log.rec(BU.subByte(rec, 0, recLen));
-                process(BU.subByte(rec, 0, recLen));
-
+                if(recLen != -1){
+                    Log.rec(BU.subByte(rec, 0, recLen));
+                    process(BU.subByte(rec, 0, recLen));
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
