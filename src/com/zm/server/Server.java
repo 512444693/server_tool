@@ -160,7 +160,8 @@ public class Server implements Runnable {
                 send(sendMsg.encode());
             }
         }catch (Exception e){
-            JOptionPane.showMessageDialog(null, e.getMessage());
+            //JOptionPane.showMessageDialog(null, e.getMessage());
+            System.out.println(e.getMessage());
         }
     }
 

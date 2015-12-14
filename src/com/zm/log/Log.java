@@ -12,7 +12,7 @@ public class Log {
     public static void send(byte[] data){
         String sData = BU.bytes2HexGoodLook(data);
         sData = SU.coverWithTime(sData);
-        sData = SU.eachLineAddPrefix(sData, ' ', 18);
+        sData = SU.eachLineAddPrefix(sData, ' ', 10);
         System.out.println(sData);
     }
 

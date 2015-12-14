@@ -16,13 +16,13 @@ public class StringUtils {
         String prefix = "";
         for(int i=0; i<times; i++)
             prefix += cPrefix;
-        String strs[] = str.split("\\n");
+        String strs[] = str.split("\\r\\n");
 
         StringBuilder ret = new StringBuilder("");
         for(int i=0; i<strs.length; i++){
             ret.append(prefix);
             ret.append(strs[i]);
-            ret.append("\n");
+            ret.append(System.getProperty("line.separator"));
         }
         return ret.toString();
     }
@@ -31,7 +31,7 @@ public class StringUtils {
     }
 
     public static void main(String[] args){
-        String a = "123asgasdfasdfasefasefasdfasdfasdfasdfasdf";
+        String a = "1111111111111111111111111111111111111111111111111111111111";
         String b = BU.bytes2HexGoodLook(a.getBytes());
         b = StringUtils.coverWithTime(b);
         String c = StringUtils.eachLineAddPrefix(b, '\t', 6);
