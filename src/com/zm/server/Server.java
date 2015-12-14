@@ -141,12 +141,16 @@ public class Server implements Runnable {
 
     public void process(byte[] data){
         decodeArea.setBackground(SU.randomColor());
+        decodeArea.setText("");
+        Message expect = null;
+        Message fact = null;
+        Message sendMsg = null;
         try{
             String recStr = recArea.getText().trim();
             if(!recStr.equals("")){
-                Message expect = new Message(recStr);
+                expect = new Message(recStr);
                 expect.encode();
-                Message fact = new Message(recStr, data);
+                fact = new Message(recStr, data);
                 fact.decode();
                 decodeArea.setText(new Date().toString() + "\r\n\r\n" +fact.toString());
                 CompareResult compareResult = expect.compare(fact);
@@ -156,12 +160,12 @@ public class Server implements Runnable {
             }
             String sendStr = sendArea.getText().trim();
             if(!sendStr.equals("")){
-                Message sendMsg = new Message(sendArea.getText());
+                sendMsg = new Message(sendArea.getText());
                 send(sendMsg.encode());
             }
         }catch (Exception e){
             //JOptionPane.showMessageDialog(null, e.getMessage());
-            System.out.println(e.getMessage());
+            decodeArea.append(e.getMessage());//显示出解码失败信息
         }
     }
 
