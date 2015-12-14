@@ -10,9 +10,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
@@ -35,6 +33,11 @@ public class Server implements Runnable {
     int recLen = 0;
 
     JFrame frame;
+
+    JMenuBar menuBar;
+    JMenu fileMenu;
+    JMenuItem saveMenuItem;
+    JMenuItem openMenuItem;
 
     JPanel ctrlPanel;
     JLabel titleLabel;
@@ -75,6 +78,17 @@ public class Server implements Runnable {
         int screenWidth= screenSize.width;
         frame.setSize(screenWidth - 170, screenHeight - 180);
         frame.setLocation(screenWidth / 20, screenHeight / 20);
+
+        menuBar = new JMenuBar();
+        fileMenu = new JMenu("文件");
+        saveMenuItem = new JMenuItem("保存");
+        saveMenuItem.addActionListener(new SaveMenuListener());
+        openMenuItem = new JMenuItem("打开");
+        openMenuItem.addActionListener(new OpenMenuListener());
+        fileMenu.add(saveMenuItem);
+        fileMenu.add(openMenuItem);
+        menuBar.add(fileMenu);
+        frame.setJMenuBar(menuBar);
 
         ctrlPanel = new JPanel();
         titleLabel = new JLabel("title");
@@ -225,6 +239,66 @@ public class Server implements Runnable {
             Log.send(data);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public class SaveMenuListener implements ActionListener{
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            JFileChooser fileSave = new JFileChooser();
+            fileSave.showSaveDialog(frame);
+            if(fileSave.getSelectedFile() != null)
+                saveFile(fileSave.getSelectedFile());
+        }
+    }
+
+    public class OpenMenuListener implements ActionListener{
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            JFileChooser fileOpen = new JFileChooser();
+            fileOpen.showOpenDialog(frame);
+            if(fileOpen.getSelectedFile() != null)
+                openFile(fileOpen.getSelectedFile());
+        }
+    }
+
+    public void saveFile(File file){
+        try {
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)));
+            writer.write(titleField.getText()); writer.write("!@#$%^&*");
+            writer.write(portField.getText()); writer.write("!@#$%^&*");
+            writer.write(TCPButton.isSelected() + ""); writer.write("!@#$%^&*");
+            writer.write(recArea.getText()); writer.write("!@#$%^&*");
+            writer.write(sendArea.getText());
+            writer.close();
+        } catch (Exception e) {
+            decodeArea.setText(e.getMessage());
+        }
+    }
+
+    public void openFile(File file){
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            char[] data = new char[4096];
+            int len = 0;
+            String tmp = "";
+            while ((len = reader.read(data, 0, 4096)) != -1)
+                tmp += new String(data, 0, len);
+            String[] strs = tmp.split("\\!\\@\\#\\$\\%\\^\\&\\*");
+            if(strs.length != 5)
+                return;
+            titleField.setText(strs[0]);
+            portField.setText(strs[1]);
+            boolean ifTCP = strs[2].equals("true")?true:false;
+            TCPButton.setSelected(ifTCP);
+            UDPButton.setSelected(!ifTCP);
+            recArea.setText(strs[3]);
+            sendArea.setText(strs[4]);
+            reader.close();
+        } catch (Exception e) {
+            decodeArea.setText(e.getMessage());
         }
     }
 }
