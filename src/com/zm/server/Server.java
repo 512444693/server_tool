@@ -70,8 +70,8 @@ public class Server implements Runnable {
         Dimension screenSize = kit.getScreenSize();
         int screenHeight= screenSize.height;
         int screenWidth= screenSize.width;
-        frame.setSize(screenWidth - 100, screenHeight - 50);
-        frame.setLocation(screenWidth / 40, screenHeight / 40);
+        frame.setSize(screenWidth - 170, screenHeight - 180);
+        frame.setLocation(screenWidth / 20, screenHeight / 20);
 
         ctrlPanel = new JPanel();
         portLabel = new JLabel("port");
@@ -84,6 +84,9 @@ public class Server implements Runnable {
                 boolean tcp = TCPButton.isSelected();
                 startServer(port, tcp);
                 startButton.setEnabled(false);
+                TCPButton.setEnabled(false);
+                UDPButton.setEnabled(false);
+                portField.setEnabled(false);
             }
         });
         group = new ButtonGroup();
@@ -104,7 +107,7 @@ public class Server implements Runnable {
         recScrollPane = new JScrollPane(recArea);
         decodeArea = new JTextArea(35, 50);
         decodeArea.setEditable(false);
-        decodeArea.setBackground(new Color(121, 209, 255));
+        //decodeArea.setBackground(new Color(121, 209, 255));
         decodeArea.setLineWrap(true);
         decodeScrollPane = new JScrollPane(decodeArea);
         sendArea = new JTextArea(35, 50);
