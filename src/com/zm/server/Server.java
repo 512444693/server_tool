@@ -267,11 +267,11 @@ public class Server implements Runnable {
     public void saveFile(File file){
         try {
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)));
-            writer.write(titleField.getText()); writer.write("!@#$%^&*");
-            writer.write(portField.getText()); writer.write("!@#$%^&*");
+            writer.write(titleField.getText().trim().equals("")?" ":titleField.getText().trim()); writer.write("!@#$%^&*");
+            writer.write(portField.getText().trim().equals("")?" ":titleField.getText().trim()); writer.write("!@#$%^&*");
             writer.write(TCPButton.isSelected() + ""); writer.write("!@#$%^&*");
-            writer.write(recArea.getText()); writer.write("!@#$%^&*");
-            writer.write(sendArea.getText());
+            writer.write(recArea.getText().trim().equals("")?" ":titleField.getText().trim()); writer.write("!@#$%^&*");
+            writer.write(sendArea.getText().trim().equals("")?" ":titleField.getText().trim());
             writer.close();
         } catch (Exception e) {
             decodeArea.setText(e.getMessage());
@@ -280,6 +280,7 @@ public class Server implements Runnable {
 
     public void openFile(File file){
         try {
+            System.out.println("123");
             BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             char[] data = new char[4096];
             int len = 0;
@@ -289,14 +290,14 @@ public class Server implements Runnable {
             String[] strs = tmp.split("\\!\\@\\#\\$\\%\\^\\&\\*");
             if(strs.length != 5)
                 return;
-            titleField.setText(strs[0]);
+            titleField.setText(strs[0].trim());
             frame.setTitle(titleField.getText());
-            portField.setText(strs[1]);
+            portField.setText(strs[1].trim());
             boolean ifTCP = strs[2].equals("true")?true:false;
             TCPButton.setSelected(ifTCP);
             UDPButton.setSelected(!ifTCP);
-            recArea.setText(strs[3]);
-            sendArea.setText(strs[4]);
+            recArea.setText(strs[3].trim());
+            sendArea.setText(strs[4].trim());
             reader.close();
         } catch (Exception e) {
             decodeArea.setText(e.getMessage());
