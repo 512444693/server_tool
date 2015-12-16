@@ -268,10 +268,10 @@ public class Server implements Runnable {
         try {
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)));
             writer.write(titleField.getText().trim().equals("")?" ":titleField.getText().trim()); writer.write("!@#$%^&*");
-            writer.write(portField.getText().trim().equals("")?" ":titleField.getText().trim()); writer.write("!@#$%^&*");
+            writer.write(portField.getText().trim().equals("")?" ":portField.getText().trim()); writer.write("!@#$%^&*");
             writer.write(TCPButton.isSelected() + ""); writer.write("!@#$%^&*");
-            writer.write(recArea.getText().trim().equals("")?" ":titleField.getText().trim()); writer.write("!@#$%^&*");
-            writer.write(sendArea.getText().trim().equals("")?" ":titleField.getText().trim());
+            writer.write(recArea.getText().trim().equals("")?" ":recArea.getText().trim()); writer.write("!@#$%^&*");
+            writer.write(sendArea.getText().trim().equals("")?" ":sendArea.getText().trim());
             writer.close();
         } catch (Exception e) {
             decodeArea.setText(e.getMessage());
