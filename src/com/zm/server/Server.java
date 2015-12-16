@@ -290,6 +290,7 @@ public class Server implements Runnable {
             if(strs.length != 5)
                 return;
             titleField.setText(strs[0]);
+            frame.setTitle(titleField.getText());
             portField.setText(strs[1]);
             boolean ifTCP = strs[2].equals("true")?true:false;
             TCPButton.setSelected(ifTCP);
