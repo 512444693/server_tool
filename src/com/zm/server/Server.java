@@ -280,7 +280,6 @@ public class Server implements Runnable {
 
     public void openFile(File file){
         try {
-            System.out.println("123");
             BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             char[] data = new char[4096];
             int len = 0;
