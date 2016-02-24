@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="P2PBase">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/P2PBase.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -21,7 +21,7 @@ import java.util.Date;
  * Created by Administrator on 2015/12/13.
  */
 public class Server implements Runnable {
-    boolean TCP = true;
+    ConnectionType cntType = ConnectionType.TCP;
 
     ServerSocket serverSocket;
     Socket socket;
@@ -48,6 +48,7 @@ public class Server implements Runnable {
     JButton startButton;
     ButtonGroup group;
     JRadioButton TCPButton;
+    JRadioButton LONGButton;
     JRadioButton UDPButton;
 
     JPanel textPanel;
@@ -107,10 +108,15 @@ public class Server implements Runnable {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int port = Integer.parseInt(portField.getText());
-                boolean tcp = TCPButton.isSelected();
-                startServer(port, tcp);
+                if(TCPButton.isSelected())
+                    cntType = ConnectionType.TCP;
+                else if(LONGButton.isSelected())
+                    cntType = ConnectionType.LONG;
+                else cntType = ConnectionType.UDP;
+                startServer(port);
                 startButton.setEnabled(false);
                 TCPButton.setEnabled(false);
+                LONGButton.setEnabled(false);
                 UDPButton.setEnabled(false);
                 portField.setEnabled(false);
             }
@@ -118,6 +124,8 @@ public class Server implements Runnable {
         group = new ButtonGroup();
         TCPButton = new JRadioButton("TCP", true);
         group.add(TCPButton);
+        LONGButton = new JRadioButton("LONG", true);
+        group.add(LONGButton);
         UDPButton = new JRadioButton("UDP", false);
         group.add(UDPButton);
 
@@ -127,6 +135,7 @@ public class Server implements Runnable {
         ctrlPanel.add(portLabel);
         ctrlPanel.add(portField);
         ctrlPanel.add(TCPButton);
+        ctrlPanel.add(LONGButton);
         ctrlPanel.add(UDPButton);
         ctrlPanel.add(startButton);
 
@@ -154,6 +163,13 @@ public class Server implements Runnable {
     }
 
     public void process(byte[] data){
+        if(cntType == ConnectionType.LONG){
+            if(BU.bytes2Hex(data).matches("^0{92}$")){
+                send(data);
+                return;
+            }
+        }
+        Log.rec(data);
         decodeArea.setBackground(SU.randomColor());
         decodeArea.setText("");
         Message expect = null;
@@ -176,6 +192,7 @@ public class Server implements Runnable {
             if(!sendStr.equals("")){
                 sendMsg = new Message(sendArea.getText());
                 send(sendMsg.encode());
+                Log.send(sendMsg.encode());
             }
         }catch (Exception e){
             //JOptionPane.showMessageDialog(null, e.getMessage());
@@ -183,15 +200,14 @@ public class Server implements Runnable {
         }
     }
 
-    public void startServer(int port, boolean TCP){
+    public void startServer(int port){
         if(serverSocket == null && datagramSocket ==null){
-            this.TCP = TCP;
             try{
-                if(TCP){
-                    serverSocket = new ServerSocket(port);
-                }else{
+                if(cntType == ConnectionType.UDP){
                     datagramSocket = new DatagramSocket(port);
                     packet = new DatagramPacket(rec, rec.length);
+                }else{
+                    serverSocket = new ServerSocket(port);
                 }
                 new Thread(this).start();
                 decodeArea.setText("Listening...\r\n");
@@ -204,18 +220,25 @@ public class Server implements Runnable {
 
     @Override
     public void run() {
+        try {
+            if(cntType == ConnectionType.LONG)
+                socket = serverSocket.accept();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         while(true){
             try {
-                if(TCP){
-                    socket = serverSocket.accept();
-                    BufferedInputStream in = new BufferedInputStream(socket.getInputStream());
-                    recLen = in.read(rec);
-                }else{
+                if(cntType == ConnectionType.UDP){
                     datagramSocket.receive(packet);
                     recLen = packet.getLength();
+                }else{
+                    if(cntType == ConnectionType.TCP)
+                        socket = serverSocket.accept();
+                    BufferedInputStream in = new BufferedInputStream(socket.getInputStream());
+                    recLen = in.read(rec);
                 }
                 if(recLen != -1){
-                    Log.rec(BU.subByte(rec, 0, recLen));
+                    //Log.rec(BU.subByte(rec, 0, recLen));
                     process(BU.subByte(rec, 0, recLen));
                 }
             } catch (IOException e) {
@@ -227,16 +250,17 @@ public class Server implements Runnable {
 
     public void send(byte[] data){
         try {
-            if(TCP){
+            if(cntType == ConnectionType.UDP){
+                DatagramPacket send = new DatagramPacket(data, data.length, packet.getAddress(), packet.getPort());
+                datagramSocket.send(send);
+            }else {
                 BufferedOutputStream out = new BufferedOutputStream(socket.getOutputStream());
                 out.write(data);
                 out.flush();
-                out.close();
-            }else {
-                DatagramPacket send = new DatagramPacket(data, data.length, packet.getAddress(), packet.getPort());
-                datagramSocket.send(send);
+                if(cntType == ConnectionType.TCP)
+                    out.close();
             }
-            Log.send(data);
+            //Log.send(data);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -269,7 +293,12 @@ public class Server implements Runnable {
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)));
             writer.write(titleField.getText().trim().equals("")?" ":titleField.getText().trim()); writer.write("!@#$%^&*");
             writer.write(portField.getText().trim().equals("")?" ":portField.getText().trim()); writer.write("!@#$%^&*");
-            writer.write(TCPButton.isSelected() + ""); writer.write("!@#$%^&*");
+            if(TCPButton.isSelected())//兼容以前版本
+                writer.write("true");
+            else if(UDPButton.isSelected())
+                writer.write("false");
+            else writer.write("long");
+            writer.write("!@#$%^&*");
             writer.write(recArea.getText().trim().equals("")?" ":recArea.getText().trim()); writer.write("!@#$%^&*");
             writer.write(sendArea.getText().trim().equals("")?" ":sendArea.getText().trim());
             writer.close();
@@ -292,9 +321,10 @@ public class Server implements Runnable {
             titleField.setText(strs[0].trim());
             frame.setTitle(titleField.getText());
             portField.setText(strs[1].trim());
-            boolean ifTCP = strs[2].equals("true")?true:false;
-            TCPButton.setSelected(ifTCP);
-            UDPButton.setSelected(!ifTCP);
+            //兼容以前版本
+            TCPButton.setSelected(strs[2].equals("true"));
+            UDPButton.setSelected(strs[2].equals("false"));
+            LONGButton.setSelected(strs[2].equals("long"));
             recArea.setText(strs[3].trim());
             sendArea.setText(strs[4].trim());
             reader.close();
