@@ -77,8 +77,8 @@ public class Server implements Runnable {
         Dimension screenSize = kit.getScreenSize();
         int screenHeight= screenSize.height;
         int screenWidth= screenSize.width;
-        frame.setSize(screenWidth - 170, screenHeight - 180);
-        frame.setLocation(screenWidth / 20, screenHeight / 20);
+        frame.setSize(screenWidth - 330, screenHeight - 320);
+        frame.setLocation(screenWidth / 8, screenHeight / 8);
 
         menuBar = new JMenuBar();
         fileMenu = new JMenu("文件");
@@ -163,7 +163,7 @@ public class Server implements Runnable {
     }
 
     public void process(byte[] data){
-        if(cntType == ConnectionType.LONG){
+        if(cntType == ConnectionType.LONG){//报活
             if(BU.bytes2Hex(data).matches("^0{92}$")){
                 send(data);
                 return;
@@ -181,7 +181,7 @@ public class Server implements Runnable {
                 expect = new Message(recStr);
                 expect.encode();
                 fact = new Message(recStr, data);
-                fact.decode();
+                fact.decode(); 
                 decodeArea.setText(new Date().toString() + "\r\n\r\n" +fact.toString());
                 CompareResult compareResult = expect.compare(fact);
                 if(!compareResult.equal){
