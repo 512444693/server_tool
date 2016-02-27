@@ -3,6 +3,7 @@ package com.zm.server;
 import com.zm.Field.CompareResult;
 import com.zm.log.Log;
 import com.zm.message.Message;
+import com.zm.message.RequestMessage;
 import com.zm.utils.BU;
 import com.zm.utils.SU;
 
@@ -181,7 +182,8 @@ public class Server implements Runnable {
                 expect = new Message(recStr);
                 expect.encode();
                 fact = new Message(recStr, data);
-                fact.decode(); 
+                fact.decode();
+                RequestMessage.registerAsReqMsg(fact);
                 decodeArea.setText(new Date().toString() + "\r\n\r\n" +fact.toString());
                 CompareResult compareResult = expect.compare(fact);
                 if(!compareResult.equal){
@@ -194,6 +196,7 @@ public class Server implements Runnable {
                 send(sendMsg.encode());
                 Log.send(sendMsg.encode());
             }
+            RequestMessage.clearReqMsg();
         }catch (Exception e){
             //JOptionPane.showMessageDialog(null, e.getMessage());
             decodeArea.append(e.getMessage());//显示出解码失败信息
