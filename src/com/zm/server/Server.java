@@ -169,6 +169,11 @@ public class Server implements Runnable {
                 send(data);
                 return;
             }
+            //另一种长连接
+            if(BU.bytes2Hex(data).equals("ffff000000000000000000000000000000000000ffffffffffffffffffffffff00000000")){
+                send(BU.hex2Bytes("fffe000000000000000000000000000000000000ffffffffffffffffffffffff00000000"));
+                return;
+            }
         }
         Log.rec(data);
         decodeArea.setBackground(SU.randomColor());
