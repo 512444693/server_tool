@@ -191,7 +191,7 @@ public class Server implements Runnable {
                 RequestMessage.registerAsReqMsg(fact);
                 decodeArea.setText(new Date().toString() + "\r\n\r\n" +fact.toString());
                 if(fact.dataCntLeftToDecode() > 0)
-                    decodeArea.append("还剩" + fact.dataCntLeftToDecode() + "字节数据没有解码");
+                    decodeArea.append("还剩" + fact.dataCntLeftToDecode() + "字节数据没有解码" + "\r\n");
                 CompareResult compareResult = expect.compare(fact);
                 if(!compareResult.equal){
                     decodeArea.append(compareResult.msg);
