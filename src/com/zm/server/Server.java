@@ -56,9 +56,11 @@ public class Server implements Runnable {
     JScrollPane recScrollPane;
     JScrollPane decodeScrollPane;
     JScrollPane sendScrollPane;
+    JScrollPane encodeScrollPane;
     JTextArea recArea;
     JTextArea decodeArea;
     JTextArea sendArea;
+    JTextArea encodeArea;
 
     public static void main(String[] args){
         new Server();
@@ -141,20 +143,24 @@ public class Server implements Runnable {
         ctrlPanel.add(startButton);
 
         textPanel = new JPanel();
-        recArea = new JTextArea(35, 50);
+        recArea = new JTextArea(20, 40);
         recArea.setLineWrap(true);
         recScrollPane = new JScrollPane(recArea);
-        decodeArea = new JTextArea(35, 50);
+        decodeArea = new JTextArea(20, 40);
         decodeArea.setEditable(false);
-        //decodeArea.setBackground(new Color(121, 209, 255));
         decodeArea.setLineWrap(true);
         decodeScrollPane = new JScrollPane(decodeArea);
-        sendArea = new JTextArea(35, 50);
+        sendArea = new JTextArea(20, 40);
         sendArea.setLineWrap(true);
         sendScrollPane = new JScrollPane(sendArea);
+        encodeArea = new JTextArea(20, 40);
+        encodeArea.setEditable(false);
+        encodeArea.setLineWrap(true);
+        encodeScrollPane = new JScrollPane(encodeArea);
         textPanel.add(recScrollPane);
         textPanel.add(decodeScrollPane);
         textPanel.add(sendScrollPane);
+        textPanel.add(encodeScrollPane);
 
         frame.getContentPane().add(BorderLayout.NORTH, ctrlPanel);
         frame.getContentPane().add(BorderLayout.CENTER, textPanel);
@@ -176,7 +182,8 @@ public class Server implements Runnable {
             }
         }
         Log.rec(data);
-        decodeArea.setBackground(SU.randomColor());
+        Color color = SU.randomColor();
+        decodeArea.setBackground(color);
         decodeArea.setText("");
         Message expect = null;
         Message fact = null;
@@ -201,6 +208,8 @@ public class Server implements Runnable {
             if(!sendStr.equals("")){
                 sendMsg = new Message(sendArea.getText());
                 send(sendMsg.encode());
+                encodeArea.setBackground(color);
+                encodeArea.setText(new Date().toString() + "\r\n\r\n" + sendMsg.toString());
                 Log.send(sendMsg.encode());
             }
             RequestMessage.clearReqMsg();
