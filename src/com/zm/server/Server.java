@@ -52,16 +52,10 @@ public class Server implements Runnable {
     JRadioButton TCPButton;
     JRadioButton LONGButton;
     JRadioButton UDPButton;
+    JButton addMsgPanelButton;
 
-    JPanel textPanel;
-    JScrollPane recScrollPane;
-    JScrollPane decodeScrollPane;
-    JScrollPane sendScrollPane;
-    JScrollPane encodeScrollPane;
-    JTextArea recArea;
-    JTextArea decodeArea;
-    JTextArea sendArea;
-    JTextArea encodeArea;
+    JPanel msgZone;
+    JScrollPane msgScrollZone;
 
     public static void main(String[] args){
         new Server();
@@ -81,7 +75,7 @@ public class Server implements Runnable {
         Dimension screenSize = kit.getScreenSize();
         int screenHeight= screenSize.height;
         int screenWidth= screenSize.width;
-        frame.setSize(screenWidth - 60, screenHeight - 400);
+        frame.setSize(screenWidth - 60, screenHeight - 500);
         frame.setLocation(0, screenHeight / 8);
 
         menuBar = new JMenuBar();
@@ -112,17 +106,21 @@ public class Server implements Runnable {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int port = Integer.parseInt(portField.getText());
-                if(TCPButton.isSelected())
-                    cntType = ConnectionType.TCP;
-                else if(LONGButton.isSelected())
-                    cntType = ConnectionType.LONG;
-                else cntType = ConnectionType.UDP;
                 startServer(port);
                 startButton.setEnabled(false);
                 TCPButton.setEnabled(false);
                 LONGButton.setEnabled(false);
                 UDPButton.setEnabled(false);
                 portField.setEnabled(false);
+            }
+        });
+        addMsgPanelButton = new JButton("add");
+        addMsgPanelButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                msgZone.add(genMsgPanel());
+                msgScrollZone.revalidate();
+                msgScrollZone.repaint();
             }
         });
         group = new ButtonGroup();
@@ -142,19 +140,45 @@ public class Server implements Runnable {
         ctrlPanel.add(LONGButton);
         ctrlPanel.add(UDPButton);
         ctrlPanel.add(startButton);
+        ctrlPanel.add(addMsgPanelButton);
+
+        msgZone = new JPanel();
+        BoxLayout boxLayout = new BoxLayout(msgZone, BoxLayout.Y_AXIS);
+        msgZone.setLayout(boxLayout);
+        msgZone.add(genMsgPanel());
+
+        msgScrollZone = new JScrollPane(msgZone);
+
+        frame.getContentPane().add(BorderLayout.NORTH, ctrlPanel);
+        frame.getContentPane().add(BorderLayout.CENTER, msgScrollZone);
+
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+    }
+
+    public JPanel genMsgPanel(){
+        JPanel textPanel;
+        JScrollPane recScrollPane;
+        JScrollPane decodeScrollPane;
+        JScrollPane sendScrollPane;
+        JScrollPane encodeScrollPane;
+        JTextArea recArea;
+        JTextArea decodeArea;
+        JTextArea sendArea;
+        JTextArea encodeArea;
 
         textPanel = new JPanel();
-        recArea = new JTextArea(20, 40);
+        recArea = new JTextArea(15, 40);
         recArea.setLineWrap(true);
         recScrollPane = new JScrollPane(recArea);
-        decodeArea = new JTextArea(20, 40);
+        decodeArea = new JTextArea(15, 40);
         decodeArea.setEditable(false);
         decodeArea.setLineWrap(true);
         decodeScrollPane = new JScrollPane(decodeArea);
-        sendArea = new JTextArea(20, 40);
+        sendArea = new JTextArea(15, 40);
         sendArea.setLineWrap(true);
         sendScrollPane = new JScrollPane(sendArea);
-        encodeArea = new JTextArea(20, 40);
+        encodeArea = new JTextArea(15, 40);
         encodeArea.setEditable(false);
         encodeArea.setLineWrap(true);
         encodeScrollPane = new JScrollPane(encodeArea);
@@ -162,13 +186,58 @@ public class Server implements Runnable {
         textPanel.add(decodeScrollPane);
         textPanel.add(sendScrollPane);
         textPanel.add(encodeScrollPane);
-
-        frame.getContentPane().add(BorderLayout.NORTH, ctrlPanel);
-        frame.getContentPane().add(BorderLayout.CENTER, textPanel);
-
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setVisible(true);
+        return textPanel;
     }
+
+    public JPanel genMsgPanel(String recAreaText, String sendAreaText){
+        JPanel textPanel;
+        JScrollPane recScrollPane;
+        JScrollPane decodeScrollPane;
+        JScrollPane sendScrollPane;
+        JScrollPane encodeScrollPane;
+        JTextArea recArea;
+        JTextArea decodeArea;
+        JTextArea sendArea;
+        JTextArea encodeArea;
+
+        textPanel = new JPanel();
+        recArea = new JTextArea(15, 40);
+        recArea.setLineWrap(true);
+        recArea.setText(recAreaText);
+        recScrollPane = new JScrollPane(recArea);
+        decodeArea = new JTextArea(15, 40);
+        decodeArea.setEditable(false);
+        decodeArea.setLineWrap(true);
+        decodeScrollPane = new JScrollPane(decodeArea);
+        sendArea = new JTextArea(15, 40);
+        sendArea.setLineWrap(true);
+        sendArea.setText(sendAreaText);
+        sendScrollPane = new JScrollPane(sendArea);
+        encodeArea = new JTextArea(15, 40);
+        encodeArea.setEditable(false);
+        encodeArea.setLineWrap(true);
+        encodeScrollPane = new JScrollPane(encodeArea);
+        textPanel.add(recScrollPane);
+        textPanel.add(decodeScrollPane);
+        textPanel.add(sendScrollPane);
+        textPanel.add(encodeScrollPane);
+        return textPanel;
+    }
+
+    public JTextArea getTextAreaFromMsgZone(int x, int y){
+        if(x > getMsgLength() || x < 0)
+            return null;
+        if(y < 0 || y > 3)
+            return null;
+        JPanel msgPanel = (JPanel)msgZone.getComponent(x);
+        JScrollPane msgScrollPane = (JScrollPane)msgPanel.getComponent(y);
+        return (JTextArea)msgScrollPane.getViewport().getView();
+    }
+
+    public int getMsgLength(){
+        return msgZone.getComponents().length;
+    }
+
 
     public void process(byte[] data){
         if(cntType == ConnectionType.LONG){//报活
@@ -184,43 +253,68 @@ public class Server implements Runnable {
         }
         Log.rec(data);
         Color color = SU.randomColor();
-        decodeArea.setBackground(color);
-        decodeArea.setText("");
         Message expect = null;
         Message fact = null;
         Message sendMsg = null;
-        try{
-            String recStr = recArea.getText().trim();
-            if(!recStr.equals("")){
-                expect = new Message(recStr);
-                expect.encode();
-                fact = new Message(recStr, data);
-                fact.decode();
-                RequestMessage.registerAsReqMsg(fact);
-                decodeArea.setText(new Date().toString() + "\r\n\r\n" +fact.toString());
-                if(fact.dataCntLeftToDecode() > 0)
-                    decodeArea.append("还剩" + fact.dataCntLeftToDecode() + "字节数据没有解码" + "\r\n");
-                CompareResult compareResult = expect.compare(fact);
-                if(!compareResult.equal){
-                    decodeArea.append(compareResult.msg);
+        boolean find = false;
+        for(int i = 0; i < getMsgLength(); i++){
+            JTextArea recArea = getTextAreaFromMsgZone(i, 0);
+            JTextArea decodeArea = getTextAreaFromMsgZone(i, 1);
+            JTextArea sendArea = getTextAreaFromMsgZone(i ,2);
+            JTextArea encodeArea = getTextAreaFromMsgZone(i ,3);
+            try{
+                String recStr = recArea.getText().trim();
+                if(!recStr.equals("")){
+                    expect = new Message(recStr);
+                    expect.encode();
+                    fact = new Message(recStr, data);
+                    try{//尝试解码，用来比较cmdid
+                        fact.decode();
+                    }catch (Exception e){}
+                    if(fact.getCmdID() != expect.getCmdID())
+                        continue;
+                    find = true;
+                    fact = new Message(recStr, data);
+                    fact.decode();//正式解码
+                    decodeArea.setBackground(color);
+                    decodeArea.setText("");
+                    RequestMessage.registerAsReqMsg(fact);
+                    decodeArea.setText(new Date().toString() + "\r\n\r\n" + fact.toString());
+                    if(fact.dataCntLeftToDecode() > 0)
+                        decodeArea.append("还剩" + fact.dataCntLeftToDecode() + "字节数据没有解码" + "\r\n");
+                    CompareResult compareResult = expect.compare(fact);
+                    if(!compareResult.equal){
+                        decodeArea.append(compareResult.msg);
+                    }
                 }
+                String sendStr = sendArea.getText().trim();
+                if(!sendStr.equals("")){
+                    sendMsg = new Message(sendArea.getText());
+                    send(sendMsg.encode());
+                    encodeArea.setBackground(color);
+                    encodeArea.setText(new Date().toString() + "\r\n\r\n" + sendMsg.toString());
+                    Log.send(sendMsg.encode());
+                }
+                RequestMessage.clearReqMsg();
+            }catch (Exception e){
+                decodeArea.append(e.getMessage());//显示出解码失败信息
             }
-            String sendStr = sendArea.getText().trim();
-            if(!sendStr.equals("")){
-                sendMsg = new Message(sendArea.getText());
-                send(sendMsg.encode());
-                encodeArea.setBackground(color);
-                encodeArea.setText(new Date().toString() + "\r\n\r\n" + sendMsg.toString());
-                Log.send(sendMsg.encode());
-            }
-            RequestMessage.clearReqMsg();
-        }catch (Exception e){
-            //JOptionPane.showMessageDialog(null, e.getMessage());
-            decodeArea.append(e.getMessage());//显示出解码失败信息
+        }
+        if(!find) {
+            getTextAreaFromMsgZone(0, 1).setBackground(color);
+            getTextAreaFromMsgZone(0, 1).setText(new Date().toString());
+            getTextAreaFromMsgZone(0, 1).append("\r\n没有找到与之相同的cmdid");
         }
     }
 
+
     public void startServer(int port){
+        if(TCPButton.isSelected())
+            cntType = ConnectionType.TCP;
+        else if(LONGButton.isSelected())
+            cntType = ConnectionType.LONG;
+        else cntType = ConnectionType.UDP;
+
         if(serverSocket == null && datagramSocket ==null){
             try{
                 if(cntType == ConnectionType.UDP){
@@ -230,7 +324,7 @@ public class Server implements Runnable {
                     serverSocket = new ServerSocket(port);
                 }
                 new Thread(this).start();
-                decodeArea.setText("Listening...\r\n");
+                getTextAreaFromMsgZone(0, 1).setText("Listening...\r\n");
             }catch (IOException e){
                 e.printStackTrace();
                 JOptionPane.showMessageDialog(null, e.getMessage());
@@ -258,7 +352,6 @@ public class Server implements Runnable {
                     recLen = in.read(rec);
                 }
                 if(recLen != -1){
-                    //Log.rec(BU.subByte(rec, 0, recLen));
                     process(BU.subByte(rec, 0, recLen));
                 }
             } catch (IOException e) {
@@ -319,11 +412,15 @@ public class Server implements Runnable {
                 writer.write("false");
             else writer.write("long");
             writer.write("!@#$%^&*");
-            writer.write(recArea.getText().trim().equals("")?" ":recArea.getText().trim()); writer.write("!@#$%^&*");
-            writer.write(sendArea.getText().trim().equals("")?" ":sendArea.getText().trim());
+            for(int i = 0; i < getMsgLength(); i++){
+                JTextArea recArea = getTextAreaFromMsgZone(i, 0);
+                JTextArea sendArea = getTextAreaFromMsgZone(i ,2);
+                writer.write(recArea.getText().trim().equals("")?" ":recArea.getText().trim()); writer.write("!@#$%^&*");
+                writer.write(sendArea.getText().trim().equals("")?" ":sendArea.getText().trim());writer.write("!@#$%^&*");
+            }
             writer.close();
         } catch (Exception e) {
-            decodeArea.setText(e.getMessage());
+            getTextAreaFromMsgZone(0, 1).setText(e.getMessage());
         }
     }
 
@@ -336,7 +433,7 @@ public class Server implements Runnable {
             while ((len = reader.read(data, 0, 4096)) != -1)
                 tmp += new String(data, 0, len);
             String[] strs = tmp.split("\\!\\@\\#\\$\\%\\^\\&\\*");
-            if(strs.length != 5)
+            if(strs.length < 5)
                 return;
             titleField.setText(strs[0].trim());
             frame.setTitle(titleField.getText());
@@ -345,11 +442,16 @@ public class Server implements Runnable {
             TCPButton.setSelected(strs[2].equals("true"));
             UDPButton.setSelected(strs[2].equals("false"));
             LONGButton.setSelected(strs[2].equals("long"));
-            recArea.setText(strs[3].trim());
-            sendArea.setText(strs[4].trim());
+            getTextAreaFromMsgZone(0, 0).setText(strs[3].trim());
+            getTextAreaFromMsgZone(0, 2).setText(strs[4].trim());
+            for(int i = 5; i < strs.length; i+=2){
+                msgZone.add(genMsgPanel(strs[i], strs[i+1]));
+            }
+            msgScrollZone.revalidate();
+            msgScrollZone.repaint();
             reader.close();
         } catch (Exception e) {
-            decodeArea.setText(e.getMessage());
+            getTextAreaFromMsgZone(0, 1).setText(e.getMessage());
         }
     }
 }
