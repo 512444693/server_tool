@@ -16,6 +16,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -80,8 +81,8 @@ public class Server implements Runnable {
         Dimension screenSize = kit.getScreenSize();
         int screenHeight= screenSize.height;
         int screenWidth= screenSize.width;
-        frame.setSize(screenWidth - 330, screenHeight - 320);
-        frame.setLocation(screenWidth / 8, screenHeight / 8);
+        frame.setSize(screenWidth - 60, screenHeight - 400);
+        frame.setLocation(0, screenHeight / 8);
 
         menuBar = new JMenuBar();
         fileMenu = new JMenu("文件");
@@ -96,7 +97,7 @@ public class Server implements Runnable {
 
         ctrlPanel = new JPanel();
         titleLabel = new JLabel("title");
-        titleField = new JTextField("Fake Server");
+        titleField = new JTextField("fake_", 20);
         titleButton = new JButton("Set title");
         titleButton.addActionListener(new ActionListener() {
             @Override
@@ -290,8 +291,8 @@ public class Server implements Runnable {
         @Override
         public void actionPerformed(ActionEvent e) {
             JFileChooser fileSave = new JFileChooser();
-            fileSave.showSaveDialog(frame);
-            if(fileSave.getSelectedFile() != null)
+            fileSave.setSelectedFile(new File(fileSave.getCurrentDirectory().getPath()+ "\\" + titleField.getText() + ".mm"));
+            if(fileSave.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION)
                 saveFile(fileSave.getSelectedFile());
         }
     }
