@@ -48,6 +48,7 @@ public class Server implements Runnable {
     JLabel portLabel;
     JTextField portField;
     JButton startButton;
+    JButton stopButton;
     ButtonGroup group;
     JRadioButton TCPButton;
     JRadioButton LONGButton;
@@ -105,13 +106,39 @@ public class Server implements Runnable {
         startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int port = Integer.parseInt(portField.getText());
-                startServer(port);
+                startServer();
                 startButton.setEnabled(false);
                 TCPButton.setEnabled(false);
                 LONGButton.setEnabled(false);
                 UDPButton.setEnabled(false);
                 portField.setEnabled(false);
+                stopButton.setEnabled(true);
+            }
+        });
+        stopButton = new JButton("stop");
+        stopButton.setEnabled(false);
+        stopButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(cntType == ConnectionType.UDP){
+                    if(datagramSocket != null)
+                        datagramSocket.close();
+                }else{
+                    try {
+                        if(socket != null)
+                            socket.close();
+                        if(serverSocket != null)
+                            serverSocket.close();
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+                startButton.setEnabled(true);
+                TCPButton.setEnabled(true);
+                LONGButton.setEnabled(true);
+                UDPButton.setEnabled(true);
+                portField.setEnabled(true);
+                stopButton.setEnabled(false);
             }
         });
         addMsgPanelButton = new JButton("add");
@@ -140,6 +167,7 @@ public class Server implements Runnable {
         ctrlPanel.add(LONGButton);
         ctrlPanel.add(UDPButton);
         ctrlPanel.add(startButton);
+        ctrlPanel.add(stopButton);
         ctrlPanel.add(addMsgPanelButton);
 
         msgZone = new JPanel();
@@ -309,57 +337,54 @@ public class Server implements Runnable {
     }
 
 
-    public void startServer(int port){
+    public void startServer(){
+        int port = Integer.parseInt(portField.getText());
         if(TCPButton.isSelected())
             cntType = ConnectionType.TCP;
         else if(LONGButton.isSelected())
             cntType = ConnectionType.LONG;
         else cntType = ConnectionType.UDP;
 
-        if(serverSocket == null && datagramSocket ==null){
-            try{
-                if(cntType == ConnectionType.UDP){
-                    datagramSocket = new DatagramSocket(port);
-                    packet = new DatagramPacket(rec, rec.length);
-                }else{
-                    serverSocket = new ServerSocket(port);
-                }
-                new Thread(this).start();
-                getTextAreaFromMsgZone(0, 1).setText("Listening...\r\n");
-            }catch (IOException e){
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(null, e.getMessage());
+        try{
+            if(cntType == ConnectionType.UDP){
+                datagramSocket = new DatagramSocket(port);
+                packet = new DatagramPacket(rec, rec.length);
+            }else{
+                serverSocket = new ServerSocket(port);
             }
+            new Thread(this).start();
+            getTextAreaFromMsgZone(0, 1).setText("Listening...\r\n");
+        }catch (IOException e){
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, e.getMessage());
         }
+
     }
 
     @Override
     public void run() {
         try {
             if(cntType == ConnectionType.LONG)
-                socket = serverSocket.accept();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        while(true){
-            try {
-                if(cntType == ConnectionType.UDP){
-                    datagramSocket.receive(packet);
+                socket = serverSocket.accept();//阻塞
+
+            while(true) {
+                if (cntType == ConnectionType.UDP) {
+                    datagramSocket.receive(packet);//阻塞
                     recLen = packet.getLength();
-                }else{
-                    if(cntType == ConnectionType.TCP)
-                        socket = serverSocket.accept();
+                } else {
+                    if (cntType == ConnectionType.TCP)
+                        socket = serverSocket.accept();//阻塞
                     BufferedInputStream in = new BufferedInputStream(socket.getInputStream());
-                    recLen = in.read(rec);
+                    recLen = in.read(rec);//阻塞
                 }
-                if(recLen != -1){
+                if (recLen != -1) {
                     process(BU.subByte(rec, 0, recLen));
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
+        } catch (IOException e) {
+            //e.printStackTrace();
+            getTextAreaFromMsgZone(0, 1).setText("停止监听\r\n");
         }
-
     }
 
     public void send(byte[] data){
