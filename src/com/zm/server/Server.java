@@ -299,6 +299,7 @@ public class Server implements Runnable {
             }catch (Exception e){
                 decodeArea.append(e.getMessage());//显示出解码失败信息
             }
+            break;
         }
         if(!find) {
             getTextAreaFromMsgZone(0, 1).setBackground(color);
