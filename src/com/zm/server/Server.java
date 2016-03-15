@@ -8,9 +8,13 @@ import com.zm.utils.BU;
 import com.zm.utils.SU;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -44,7 +48,6 @@ public class Server implements Runnable {
     JPanel ctrlPanel;
     JLabel titleLabel;
     JTextField titleField;
-    JButton titleButton;
     JLabel portLabel;
     JTextField portField;
     JButton startButton;
@@ -76,8 +79,8 @@ public class Server implements Runnable {
         Dimension screenSize = kit.getScreenSize();
         int screenHeight= screenSize.height;
         int screenWidth= screenSize.width;
-        frame.setSize(screenWidth - 60, screenHeight - 500);
-        frame.setLocation(0, screenHeight / 8);
+        frame.setSize(screenWidth - 230, screenHeight - 480);
+        frame.setLocation(screenWidth / 8, screenHeight / 8);
 
         menuBar = new JMenuBar();
         fileMenu = new JMenu("文件");
@@ -93,10 +96,13 @@ public class Server implements Runnable {
         ctrlPanel = new JPanel();
         titleLabel = new JLabel("title");
         titleField = new JTextField("fake_", 20);
-        titleButton = new JButton("Set title");
-        titleButton.addActionListener(new ActionListener() {
+        titleField.addFocusListener(new FocusListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void focusGained(FocusEvent e) {
+
+            }
+            @Override
+            public void focusLost(FocusEvent e) {
                 frame.setTitle(titleField.getText());
             }
         });
@@ -160,7 +166,6 @@ public class Server implements Runnable {
 
         ctrlPanel.add(titleLabel);
         ctrlPanel.add(titleField);
-        ctrlPanel.add(titleButton);
         ctrlPanel.add(portLabel);
         ctrlPanel.add(portField);
         ctrlPanel.add(TCPButton);
