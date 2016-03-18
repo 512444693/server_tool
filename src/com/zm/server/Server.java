@@ -416,7 +416,7 @@ public class Server implements Runnable {
         @Override
         public void actionPerformed(ActionEvent e) {
             JFileChooser fileSave = new JFileChooser();
-            fileSave.setSelectedFile(new File(fileSave.getCurrentDirectory().getPath()+ "\\" + titleField.getText() + ".mm"));
+            fileSave.setSelectedFile(new File(fileSave.getCurrentDirectory().getPath() + "\\" + titleField.getText() + ".mm"));
             if(fileSave.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION)
                 saveFile(fileSave.getSelectedFile());
         }
@@ -458,6 +458,9 @@ public class Server implements Runnable {
 
     public void openFile(File file){
         try {
+            for(int i = getMsgLength() - 1; i > 0; i--){
+                msgZone.remove(i);
+            }
             BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             char[] data = new char[4096];
             int len = 0;
