@@ -323,10 +323,11 @@ public class Server implements Runnable {
                 String sendStr = sendArea.getText().trim();
                 if(!sendStr.equals("")){
                     sendMsg = new Message(sendArea.getText());
-                    send(sendMsg.encode());
+                    byte[] sendData = sendMsg.encode();
+                    send(sendData);
                     encodeArea.setBackground(color);
                     encodeArea.setText(new Date().toString() + "\r\n\r\n" + sendMsg.toString());
-                    Log.send(sendMsg.encode());
+                    Log.send(sendData);
                 }
                 RequestMessage.clearReqMsg();
             }catch (Exception e){
