@@ -339,6 +339,7 @@ public class Server implements Runnable {
             getTextAreaFromMsgZone(0, 1).setBackground(color);
             getTextAreaFromMsgZone(0, 1).setText(new Date().toString());
             getTextAreaFromMsgZone(0, 1).append("\r\n没有找到与之相同的cmdid");
+            getTextAreaFromMsgZone(0, 1).append("\r\n实际收到的cmdid可能为 " + fact.getCmdID());
         }
     }
 
