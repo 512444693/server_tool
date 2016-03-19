@@ -308,7 +308,7 @@ public class Server implements Runnable {
                         continue;
                     find = true;
                     fact = new Message(recStr, data);
-                    fact.decode();//正式解码
+                    fact.decode();//正式解码,需要捕获解码异常
                     decodeArea.setBackground(color);
                     decodeArea.setText("");
                     RequestMessage.registerAsReqMsg(fact);
