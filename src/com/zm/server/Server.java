@@ -79,8 +79,8 @@ public class Server implements Runnable {
         Dimension screenSize = kit.getScreenSize();
         int screenHeight= screenSize.height;
         int screenWidth= screenSize.width;
-        frame.setSize(screenWidth - 230, screenHeight - 480);
-        frame.setLocation(screenWidth / 8, screenHeight / 8);
+        frame.setSize(screenWidth, screenHeight - 480);
+        frame.setLocation(0, screenHeight / 8);
 
         menuBar = new JMenuBar();
         fileMenu = new JMenu("文件");
@@ -151,7 +151,7 @@ public class Server implements Runnable {
         addMsgPanelButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                msgZone.add(genMsgPanel());
+                msgZone.add(genMsgPanel("", ""));
                 msgScrollZone.revalidate();
                 msgScrollZone.repaint();
             }
@@ -178,7 +178,7 @@ public class Server implements Runnable {
         msgZone = new JPanel();
         BoxLayout boxLayout = new BoxLayout(msgZone, BoxLayout.Y_AXIS);
         msgZone.setLayout(boxLayout);
-        msgZone.add(genMsgPanel());
+        msgZone.add(genMsgPanel("", ""));
 
         msgScrollZone = new JScrollPane(msgZone);
 
@@ -187,39 +187,6 @@ public class Server implements Runnable {
 
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setVisible(true);
-    }
-
-    public JPanel genMsgPanel(){
-        JPanel textPanel;
-        JScrollPane recScrollPane;
-        JScrollPane decodeScrollPane;
-        JScrollPane sendScrollPane;
-        JScrollPane encodeScrollPane;
-        JTextArea recArea;
-        JTextArea decodeArea;
-        JTextArea sendArea;
-        JTextArea encodeArea;
-
-        textPanel = new JPanel();
-        recArea = new JTextArea(15, 40);
-        recArea.setLineWrap(true);
-        recScrollPane = new JScrollPane(recArea);
-        decodeArea = new JTextArea(15, 40);
-        decodeArea.setEditable(false);
-        decodeArea.setLineWrap(true);
-        decodeScrollPane = new JScrollPane(decodeArea);
-        sendArea = new JTextArea(15, 40);
-        sendArea.setLineWrap(true);
-        sendScrollPane = new JScrollPane(sendArea);
-        encodeArea = new JTextArea(15, 40);
-        encodeArea.setEditable(false);
-        encodeArea.setLineWrap(true);
-        encodeScrollPane = new JScrollPane(encodeArea);
-        textPanel.add(recScrollPane);
-        textPanel.add(decodeScrollPane);
-        textPanel.add(sendScrollPane);
-        textPanel.add(encodeScrollPane);
-        return textPanel;
     }
 
     public JPanel genMsgPanel(String recAreaText, String sendAreaText){
@@ -233,20 +200,21 @@ public class Server implements Runnable {
         JTextArea sendArea;
         JTextArea encodeArea;
 
+        int height = 15, width = 49;
         textPanel = new JPanel();
-        recArea = new JTextArea(15, 40);
+        recArea = new JTextArea(height, width);
         recArea.setLineWrap(true);
         recArea.setText(recAreaText);
         recScrollPane = new JScrollPane(recArea);
-        decodeArea = new JTextArea(15, 40);
+        decodeArea = new JTextArea(height, width);
         decodeArea.setEditable(false);
         decodeArea.setLineWrap(true);
         decodeScrollPane = new JScrollPane(decodeArea);
-        sendArea = new JTextArea(15, 40);
+        sendArea = new JTextArea(height, width);
         sendArea.setLineWrap(true);
         sendArea.setText(sendAreaText);
         sendScrollPane = new JScrollPane(sendArea);
-        encodeArea = new JTextArea(15, 40);
+        encodeArea = new JTextArea(height, width);
         encodeArea.setEditable(false);
         encodeArea.setLineWrap(true);
         encodeScrollPane = new JScrollPane(encodeArea);
