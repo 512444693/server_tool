@@ -59,11 +59,8 @@ public class Server implements Runnable {
     JRadioButton UDPButton;
     JButton addMsgPanelButton;
 
-    ButtonGroup resWaitGroup;
-    JRadioButton resBlankNoWait;
-    JRadioButton resBlankWait;
-
-    JLabel resBlankIfWaitInfo;
+    JCheckBox resWait;
+    JLabel resWaitInfo;
 
     JPanel msgZone;
     JScrollPane msgScrollZone;
@@ -171,14 +168,9 @@ public class Server implements Runnable {
         UDPButton = new JRadioButton("UDP", false);
         group.add(UDPButton);
 
-        resWaitGroup = new ButtonGroup();
-        resBlankNoWait = new JRadioButton("回包空白不等待", true);
-        resWaitGroup.add(resBlankNoWait);
-        resBlankWait = new JRadioButton("回包空白等待");
-        resWaitGroup.add(resBlankWait);
+        resWait = new JCheckBox("回包等待", false);
 
-        resBlankIfWaitInfo = new JLabel();
-        resBlankIfWaitInfo.setBorder(new LineBorder(new Color(255, 0, 0)));
+        resWaitInfo = new JLabel("                     ");
 
         ctrlPanel.add(titleLabel);
         ctrlPanel.add(titleField);
@@ -190,9 +182,8 @@ public class Server implements Runnable {
         ctrlPanel.add(startButton);
         ctrlPanel.add(stopButton);
         ctrlPanel.add(addMsgPanelButton);
-        ctrlPanel.add(resBlankNoWait);
-        ctrlPanel.add(resBlankWait);
-        ctrlPanel.add(resBlankIfWaitInfo);
+        ctrlPanel.add(resWait);
+        ctrlPanel.add(resWaitInfo);
 
         msgZone = new JPanel();
         BoxLayout boxLayout = new BoxLayout(msgZone, BoxLayout.Y_AXIS);
@@ -308,15 +299,13 @@ public class Server implements Runnable {
                     }
                 }
 
-                if(resBlankWait.isSelected()){
-                    for(int j = 0; j < 5; j++){//等待25秒，若发包框有内容则直接break
-                        if(!sendArea.getText().trim().equals(""))
-                            break;
-                        resBlankIfWaitInfo.setText("回包空白等待中，不接受任何包");
-                        Thread.sleep(5000);
-                    }
+                while(resWait.isSelected()){
+                    resWaitInfo.setBorder(new LineBorder(new Color(255, 0, 0)));
+                    resWaitInfo.setText("回包等待中,不处理任何包");
+                    Thread.sleep(1000);
                 }
-                resBlankIfWaitInfo.setText("");
+                resWaitInfo.setText("                     ");
+                resWaitInfo.setBorder(null);
 
                 if(!sendArea.getText().trim().equals("")){
                     sendMsg = new Message(sendArea.getText().trim());
