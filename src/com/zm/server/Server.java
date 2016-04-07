@@ -8,6 +8,7 @@ import com.zm.utils.BU;
 import com.zm.utils.SU;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
@@ -57,6 +58,12 @@ public class Server implements Runnable {
     JRadioButton LONGButton;
     JRadioButton UDPButton;
     JButton addMsgPanelButton;
+
+    ButtonGroup resWaitGroup;
+    JRadioButton resBlankNoWait;
+    JRadioButton resBlankWait;
+
+    JLabel resBlankIfWaitInfo;
 
     JPanel msgZone;
     JScrollPane msgScrollZone;
@@ -159,10 +166,19 @@ public class Server implements Runnable {
         group = new ButtonGroup();
         TCPButton = new JRadioButton("TCP", true);
         group.add(TCPButton);
-        LONGButton = new JRadioButton("LONG", true);
+        LONGButton = new JRadioButton("LONG", false);
         group.add(LONGButton);
         UDPButton = new JRadioButton("UDP", false);
         group.add(UDPButton);
+
+        resWaitGroup = new ButtonGroup();
+        resBlankNoWait = new JRadioButton("回包空白不等待", true);
+        resWaitGroup.add(resBlankNoWait);
+        resBlankWait = new JRadioButton("回包空白等待");
+        resWaitGroup.add(resBlankWait);
+
+        resBlankIfWaitInfo = new JLabel();
+        resBlankIfWaitInfo.setBorder(new LineBorder(new Color(255, 0, 0)));
 
         ctrlPanel.add(titleLabel);
         ctrlPanel.add(titleField);
@@ -174,6 +190,9 @@ public class Server implements Runnable {
         ctrlPanel.add(startButton);
         ctrlPanel.add(stopButton);
         ctrlPanel.add(addMsgPanelButton);
+        ctrlPanel.add(resBlankNoWait);
+        ctrlPanel.add(resBlankWait);
+        ctrlPanel.add(resBlankIfWaitInfo);
 
         msgZone = new JPanel();
         BoxLayout boxLayout = new BoxLayout(msgZone, BoxLayout.Y_AXIS);
@@ -288,9 +307,19 @@ public class Server implements Runnable {
                         decodeArea.append(compareResult.msg);
                     }
                 }
-                String sendStr = sendArea.getText().trim();
-                if(!sendStr.equals("")){
-                    sendMsg = new Message(sendArea.getText());
+
+                if(resBlankWait.isSelected()){
+                    for(int j = 0; j < 5; j++){//等待25秒，若发包框有内容则直接break
+                        if(!sendArea.getText().trim().equals(""))
+                            break;
+                        resBlankIfWaitInfo.setText("回包空白等待中，不接受任何包");
+                        Thread.sleep(5000);
+                    }
+                }
+                resBlankIfWaitInfo.setText("");
+
+                if(!sendArea.getText().trim().equals("")){
+                    sendMsg = new Message(sendArea.getText().trim());
                     byte[] sendData = sendMsg.encode();
                     send(sendData);
                     encodeArea.setBackground(color);
