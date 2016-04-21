@@ -285,10 +285,10 @@ public class Server implements Runnable {
                     if(fact.getCmdID() != expect.getCmdID())
                         continue;
                     find = true;
-                    fact = new Message(recStr, data);
-                    fact.decode();//正式解码,需要捕获解码异常
                     decodeArea.setBackground(color);
                     decodeArea.setText("");
+                    fact = new Message(recStr, data);
+                    fact.decode();//正式解码,需要捕获解码异常
                     RequestMessage.registerAsReqMsg(fact);
                     decodeArea.setText(new Date().toString() + "\r\n\r\n" + fact.toString());
                     if(fact.dataCntLeftToDecode() > 0)
