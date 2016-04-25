@@ -209,25 +209,36 @@ public class Server implements Runnable {
         JTextArea decodeArea;
         JTextArea sendArea;
         JTextArea encodeArea;
-
         int height = 15, width = 49;
         textPanel = new JPanel();
         recArea = new JTextArea(height, width);
-        recArea.setLineWrap(true);
         recArea.setText(recAreaText);
         recScrollPane = new JScrollPane(recArea);
+        recScrollPane.setHorizontalScrollBarPolicy(
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        recScrollPane.setVerticalScrollBarPolicy(
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         decodeArea = new JTextArea(height, width);
         decodeArea.setEditable(false);
-        decodeArea.setLineWrap(true);
         decodeScrollPane = new JScrollPane(decodeArea);
+        decodeScrollPane.setHorizontalScrollBarPolicy(
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        decodeScrollPane.setVerticalScrollBarPolicy(
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         sendArea = new JTextArea(height, width);
-        sendArea.setLineWrap(true);
         sendArea.setText(sendAreaText);
         sendScrollPane = new JScrollPane(sendArea);
+        sendScrollPane.setHorizontalScrollBarPolicy(
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        sendScrollPane.setVerticalScrollBarPolicy(
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         encodeArea = new JTextArea(height, width);
         encodeArea.setEditable(false);
-        encodeArea.setLineWrap(true);
         encodeScrollPane = new JScrollPane(encodeArea);
+        encodeScrollPane.setHorizontalScrollBarPolicy(
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        encodeScrollPane.setVerticalScrollBarPolicy(
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         textPanel.add(recScrollPane);
         textPanel.add(decodeScrollPane);
         textPanel.add(sendScrollPane);
