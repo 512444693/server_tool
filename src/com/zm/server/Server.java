@@ -308,25 +308,25 @@ public class Server implements Runnable {
                     if(!compareResult.equal){
                         decodeArea.append(compareResult.msg);
                     }
-                }
 
-                while(resWait.isSelected()){
-                    resWaitInfo.setBorder(new LineBorder(new Color(255, 0, 0)));
-                    resWaitInfo.setText("回包等待中,不处理任何包");
-                    Thread.sleep(1000);
-                }
-                resWaitInfo.setText("                     ");
-                resWaitInfo.setBorder(null);
+                    while(resWait.isSelected()){
+                        resWaitInfo.setBorder(new LineBorder(new Color(255, 0, 0)));
+                        resWaitInfo.setText("回包等待中,不处理任何包");
+                        Thread.sleep(1000);
+                    }
+                    resWaitInfo.setText("                     ");
+                    resWaitInfo.setBorder(null);
 
-                if(!sendArea.getText().trim().equals("")){
-                    sendMsg = new Message(sendArea.getText().trim());
-                    byte[] sendData = sendMsg.encode();
-                    send(sendData);
-                    encodeArea.setBackground(color);
-                    encodeArea.setText(new Date().toString() + "\r\n\r\n" + sendMsg.toString());
-                    Log.send(sendData);
+                    if(!sendArea.getText().trim().equals("")){
+                        sendMsg = new Message(sendArea.getText().trim());
+                        byte[] sendData = sendMsg.encode();
+                        send(sendData);
+                        encodeArea.setBackground(color);
+                        encodeArea.setText(new Date().toString() + "\r\n\r\n" + sendMsg.toString());
+                        Log.send(sendData);
+                    }
+                    RequestMessage.clearReqMsg();
                 }
-                RequestMessage.clearReqMsg();
             }catch (Exception e){
                 decodeArea.append(e.getMessage());//显示出解码失败信息
             }
@@ -336,7 +336,16 @@ public class Server implements Runnable {
             getTextAreaFromMsgZone(0, 1).setBackground(color);
             getTextAreaFromMsgZone(0, 1).setText(new Date().toString());
             getTextAreaFromMsgZone(0, 1).append("\r\n没有找到与之相同的cmdid");
-            getTextAreaFromMsgZone(0, 1).append("\r\n实际收到的cmdid可能为 " + fact.getCmdID());
+            if(fact != null)
+                getTextAreaFromMsgZone(0, 1).append("\r\n实际收到的cmdid可能为 " + fact.getCmdID());
+        }
+        if(cntType == ConnectionType.TCP){//短连接，无论怎样最后关闭连接则关闭连接
+            try {
+                if(socket != null)
+                    socket.close();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
         }
     }
 
@@ -383,11 +392,18 @@ public class Server implements Runnable {
                 }
                 if (recLen != -1) {
                     process(BU.subByte(rec, 0, recLen));
+                }else{//如果为-1则为视连接被对方关闭
+                    if(socket != null)
+                        socket.close();
+                    if(cntType == ConnectionType.LONG)
+                        socket = serverSocket.accept();//阻塞
                 }
             }
         } catch (IOException e) {
-            //e.printStackTrace();
             getTextAreaFromMsgZone(0, 1).setText("停止监听\r\n");
+        }catch (Exception ec){
+            getTextAreaFromMsgZone(0, 1).setText("oops 程序发生错误，请stop后重新start\r\n");
+            ec.printStackTrace();
         }
     }
 
