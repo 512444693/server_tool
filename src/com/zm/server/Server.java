@@ -422,7 +422,6 @@ public class Server implements Runnable {
             }
         } catch (IOException e) {
             linkInfo.setText("停止监听\r\n");
-            e.printStackTrace();
         }catch (Exception ec){
             linkInfo.setText("oops 程序发生错误，请stop后重新start\r\n");
             ec.printStackTrace();
