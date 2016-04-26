@@ -314,10 +314,12 @@ public class Server implements Runnable {
                     while(resWait.isSelected()){
                         resWaitInfo.setBorder(new LineBorder(new Color(255, 0, 0)));
                         resWaitInfo.setText("回包等待中,不处理任何包");
+                        stopButton.setEnabled(false);
                         Thread.sleep(1000);
                     }
                     resWaitInfo.setText("                     ");
                     resWaitInfo.setBorder(null);
+                    stopButton.setEnabled(true);
 
                     if(!sendArea.getText().trim().equals("")){
                         sendMsg = new Message(sendArea.getText().trim());
