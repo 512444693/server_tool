@@ -17,10 +17,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.io.*;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -61,6 +58,8 @@ public class Server implements Runnable {
 
     JCheckBox resWait;
     JLabel resWaitInfo;
+
+    JTextField linkInfo;
 
     JPanel msgZone;
     JScrollPane msgScrollZone;
@@ -171,6 +170,8 @@ public class Server implements Runnable {
         resWait = new JCheckBox("回包等待", false);
 
         resWaitInfo = new JLabel("                     ");
+        linkInfo = new JTextField(30);
+        linkInfo.setEnabled(false);
 
         ctrlPanel.add(titleLabel);
         ctrlPanel.add(titleField);
@@ -184,6 +185,7 @@ public class Server implements Runnable {
         ctrlPanel.add(addMsgPanelButton);
         ctrlPanel.add(resWait);
         ctrlPanel.add(resWaitInfo);
+        ctrlPanel.add(linkInfo);
 
         msgZone = new JPanel();
         BoxLayout boxLayout = new BoxLayout(msgZone, BoxLayout.Y_AXIS);
@@ -366,7 +368,7 @@ public class Server implements Runnable {
                 serverSocket = new ServerSocket(port);
             }
             new Thread(this).start();
-            getTextAreaFromMsgZone(0, 1).setText("Listening...\r\n");
+            linkInfo.setText("Listening...\r\n");
         }catch (IOException e){
             e.printStackTrace();
             JOptionPane.showMessageDialog(null, e.getMessage());
@@ -387,22 +389,40 @@ public class Server implements Runnable {
                 } else {
                     if (cntType == ConnectionType.TCP)
                         socket = serverSocket.accept();//阻塞
+
+                    if(cntType == ConnectionType.LONG)//长连接才会有连接信息
+                        linkInfo.setText("当前连接 " + socket.getInetAddress().getHostAddress() + ":" + socket.getPort());
+
                     BufferedInputStream in = new BufferedInputStream(socket.getInputStream());
-                    recLen = in.read(rec);//阻塞
+                    try{
+                        recLen = in.read(rec);//阻塞
+                    }catch (SocketException se){//这种情况是：在线程睡眠过程中，连接被关闭，而之后又进行了写操作，抛出异常
+                        if(socket != null)
+                            socket.close();
+                        if(cntType == ConnectionType.LONG){
+                            linkInfo.setText("连接被对方断开\r\n");
+                            socket = serverSocket.accept();//阻塞
+                            continue;
+                        }
+                    }
+
                 }
-                if (recLen != -1) {
+                if (recLen > 0) {
                     process(BU.subByte(rec, 0, recLen));
-                }else{//如果为-1则为视连接被对方关闭
+                }else if (recLen == -1){//如果为-1则为视连接被对方关闭
                     if(socket != null)
                         socket.close();
-                    if(cntType == ConnectionType.LONG)
+                    if(cntType == ConnectionType.LONG){
+                        linkInfo.setText("连接被对方断开\r\n");
                         socket = serverSocket.accept();//阻塞
+                    }
                 }
             }
         } catch (IOException e) {
-            getTextAreaFromMsgZone(0, 1).setText("停止监听\r\n");
+            linkInfo.setText("停止监听\r\n");
+            e.printStackTrace();
         }catch (Exception ec){
-            getTextAreaFromMsgZone(0, 1).setText("oops 程序发生错误，请stop后重新start\r\n");
+            linkInfo.setText("oops 程序发生错误，请stop后重新start\r\n");
             ec.printStackTrace();
         }
     }
