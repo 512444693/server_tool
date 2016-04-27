@@ -323,11 +323,16 @@ public class Server implements Runnable {
 
                     if(!sendArea.getText().trim().equals("")){
                         sendMsg = new Message(sendArea.getText().trim());
-                        byte[] sendData = sendMsg.encode();
-                        send(sendData);
-                        encodeArea.setBackground(color);
-                        encodeArea.setText(new Date().toString() + "\r\n\r\n" + sendMsg.toString());
-                        Log.send(sendData);
+                        try{
+                            byte[] sendData = sendMsg.encode();
+                            send(sendData);
+                            encodeArea.setBackground(color);
+                            encodeArea.setText(new Date().toString() + "\r\n\r\n" + sendMsg.toString());
+                            Log.send(sendData);
+                        }catch (Exception e){//将回包编码失败信息放在编码log区域
+                            encodeArea.append(e.getMessage());
+                            break;
+                        }
                     }
                     RequestMessage.clearReqMsg();
                 }
@@ -343,7 +348,7 @@ public class Server implements Runnable {
             if(fact != null)
                 getTextAreaFromMsgZone(0, 1).append("\r\n实际收到的cmdid可能为 " + fact.getCmdID());
         }
-        if(cntType == ConnectionType.TCP){//短连接，无论怎样最后关闭连接则关闭连接
+        if(cntType == ConnectionType.TCP){//短连接，无论怎样最后关闭连接
             try {
                 if(socket != null)
                     socket.close();
